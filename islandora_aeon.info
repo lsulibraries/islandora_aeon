@@ -1,0 +1,4 @@
+name = islandora aeon
+desrcription = link item to request from atlas-sys aeon
+core = 7.x
+dependencies[] = islandora
