@@ -48,7 +48,20 @@ Title=Digital%20Repository%20Request&CallNumber=';
  * Implements hook_preprocess().
  */
 
-function islandora_aeon_preprocess_islandora_large_image(&$variables) {
-  $variables['aeon_link'] = check_path();
-}
+//function islandora_aeon_preprocess_islandora_large_image(&$variables) {
+//  $variables['aeon_link'] = check_path();
+//}
 
+/**
+ * Implements hook_theme_registry_alter().
+ */
+
+function islandora_aeon_theme_registry_alter(&$theme_registry) {
+  if (isset($theme_registry['islandora_large_image'])) {
+    $module_path = drupal_get_path('module', 'islandora_aeon');
+    $theme_registry['islandora_large_image']['theme path'] = $module_path;
+    $theme_registry['islandora_large_image']['path'] = $module_path . '/templates/';
+    $theme_registry['islandora_large_image']['variables']['aeon_link'] = l('Place Order', check_path());
+  }
+
+}
