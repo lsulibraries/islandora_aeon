@@ -19,52 +19,52 @@ function islandora_aeon_menu(){
 /**
  * Check if path matches an aeon enabled namespace
  */
-
+//
 function check_path() {
-  $list = variable_get('islandora_aeon_namespace_list');
+  $list = variable_get('islandora_aeon_namespace_list','test');
   if (isset($list)) {
-  //dpm($list);
-  $path = str_replace('/', '', request_uri());
-  if(strpos($path, 'collection') === FALSE) {
-    $list = explode(' ', $list);
-    foreach($list as $namespace) {
+    //dpm($list);
+    $path = str_replace('/', '', request_uri());
+    if(strpos($path, 'collection') === FALSE) {
+      $list = explode(' ', $list);
+      foreach($list as $namespace) {
       //$link = (strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '';
-    } 
-    $pid = str_replace('/islandora/object/','', request_uri());
-    $first = variable_get('islandora_aeon_url');
-    $second = '/Aeon.dll?Action=10&Form=20&Value
+      }
+      $pid = str_replace('/islandora/object/','', request_uri());
+      $first = variable_get('islandora_aeon_url');
+      $second = '/Aeon.dll?Action=10&Form=20&Value
 =GenericRequestDigitalImage&genre=default&Item
 Title=Digital%20Repository%20Request&CallNumber=';
-    $third = '&Location=';
-    $fourth = 'http://' . $_SERVER['SERVER_NAME'];
-    $fifth = '/fedora/repository/';
-    $sixth = '&Notes=';
-    $obj = islandora_object_load($pid);
-    $aeon_link =  $first . $second . $third . $pid  . $fourth. $fifth . $pid . $sixth . $obj->label;
-    //dpm($aeon_link);
-    return $aeon_link;
+      $third = '&Location=';
+      $fourth = 'http://' . $_SERVER['SERVER_NAME'];
+      $fifth = '/fedora/repository/';
+      $sixth = '&Notes=';
+      $obj = islandora_object_load($pid);
+      $aeon_link =  $first . $second . $third . $pid  . $fourth. $fifth . $pid . $sixth . $obj->label;
+      //dpm($aeon_link);
+      return $aeon_link;
     }
   }
 }
+//
+// /**
+//  * Implements hook_preprocess().
+//  */
+//
+// //function islandora_aeon_preprocess_islandora_large_image(&$variables) {
+// //  $variables['aeon_link'] = check_path();
+// //}
 
-/**
- * Implements hook_preprocess().
- */
-
-//function islandora_aeon_preprocess_islandora_large_image(&$variables) {
-//  $variables['aeon_link'] = check_path();
-//}
-
-/**
- * Implements hook_theme_registry_alter().
- */
+ /**
+  * Implements hook_theme_registry_alter().
+  */
 
 function islandora_aeon_theme_registry_alter(&$theme_registry) {
   if (isset($theme_registry['islandora_large_image'])) {
     $module_path = drupal_get_path('module', 'islandora_aeon');
     $theme_registry['islandora_large_image']['theme path'] = $module_path;
     $theme_registry['islandora_large_image']['path'] = $module_path . '/templates/';
-    $theme_registry['islandora_large_image']['variables']['aeon_link'] = l('Place Order', check_path());
+    $theme_registry['islandora_large_image']['variables']['aeon_link'] = l('Place Order', 'test');//check_path());
   }
 
 }
