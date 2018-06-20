@@ -16,7 +16,8 @@ function islandora_aeon_admin_form($form, &$form_state) {
     '#title' => 'Namespace List',
     '#type' => 'textarea',
     '#value' => $ns_list,
-    '#description' => 'Enter namespace(s) you would like directed to the aeon request service.'
+    '#description' => 'Enter namespace(s) you would like directed to the aeon request service.',
+    '#default_value' => 'test-namespace',
   );
   $form['link'] = array(
     '#title' => 'Link to Aeon service',
