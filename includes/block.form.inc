@@ -11,30 +11,41 @@
  /**
   * Check if path matches an aeon enabled namespace
  */
- function check_path() {
-   $list = variable_get('islandora_aeon_namespace_list','test');
-   if (isset($list)) {
-     $path = str_replace('/', '', request_uri());
-     if(strpos($path, 'collection') === FALSE) {
-       $list = explode(' ', $list);
-       foreach($list as $namespace) {
-         $link = (strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '';
-       }
-       $pid = str_replace('/islandora/object/','', request_uri());
-       $first = variable_get('islandora_aeon_url');
-       $second = '/Aeon.dll?Action=10&Form=20&Value
- =GenericRequestDigitalImage&genre=default&Item
- Title=Digital%20Repository%20Request&CallNumber=';
-       $third = '&Location=';
-       $fourth = 'http://' . $_SERVER['SERVER_NAME'];
-       $fifth = '/fedora/repository/';
-       $sixth = '&Notes=';
-       $obj = islandora_object_load($pid);
-       $aeon_link =  $first . $second . $third . $pid  . $fourth. $fifth . $pid . $sixth . $obj->label;
-       return $aeon_link;
-     }
-   }
- }
+
+function check_path() {
+  $list = variable_get('islandora_aeon_namespace_list','test');
+  if (isset($list)) {
+    $path = str_replace('/', '', request_uri());
+    if(strpos($path, 'collection') === FALSE) {
+      $list = explode(' ', $list);
+      foreach($list as $namespace) {
+        $link = (strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '';
+      }
+      $pid = str_replace('/islandora/object/','', request_uri());
+      $first = variable_get('islandora_aeon_url');
+//       $second = '/Aeon.dll?Action=10&Form=20&Value
+// =GenericRequestDigitalImage&genre=default&Item
+// Title=Digital%20Repository%20Request&CallNumber=';
+//       $third = '&Location=';
+//       $fourth = 'http://' . $_SERVER['SERVER_NAME'];
+//       $fifth = '/fedora/repository/';
+//       $sixth = '&Notes=';
+      $second = '/RemoteAuth/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
+      $third = '&DocumentType=Unknown'; //aka Material Type
+      $fourth = '&ItemTitle='; //aka Title/Archival Collection Name
+      $loc_url = urldecode('Louisiana & Lower Mississippi Valley Collections');
+      $fifth = '&Location=' . $loc_url;
+      $sixth = '&CallNumber=';
+      $obj = islandora_object_load($pid);
+      $seventh = '&Notes=';
+      //$obj->models;
+      //$obj->owner;
+      $url = $_SERVER['SERVER_NAME'] . ':8000' . '/fedora/repository/' . $pid;
+      $aeon_link =  $first . $second . $third . $fourth . $obj->label . $fifth . $sixth . $pid  . $seventh . $url;
+      return $aeon_link;
+    }
+  }
+}
 
 
 
