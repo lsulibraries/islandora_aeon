@@ -18,8 +18,9 @@ function islandora_aeon_menu(){
 
 /**
  * Check if path matches an aeon enabled namespace
- */
+ 
 //
+
 function check_path() {
   $list = variable_get('islandora_aeon_namespace_list','test');
   if (isset($list)) {
@@ -46,6 +47,7 @@ Title=Digital%20Repository%20Request&CallNumber=';
     }
   }
 }
+*/
 //
 // /**
 //  * Implements hook_preprocess().
