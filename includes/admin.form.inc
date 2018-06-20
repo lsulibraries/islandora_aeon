@@ -22,13 +22,12 @@ function islandora_aeon_admin_form($form, &$form_state) {
   $form['link'] = array(
     '#title' => 'Link to Aeon service',
     '#type' => 'textfield',
-    '#default_value' => 'https://example.org', //example path to aeon site 
+    '#default_value' => 'https://example.org', //example path to aeon site
   );
   $form['submit'] = array(
    '#type' => 'submit',
    '#value' => t('Submit'),
   );
-//  dpm($form_state);
   return $form;
 }
 
