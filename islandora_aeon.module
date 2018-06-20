@@ -22,6 +22,7 @@ function islandora_aeon_menu(){
 
 function check_path() {
   $list = variable_get('islandora_aeon_namespace_list');
+  if (isset($list)) {
   //dpm($list);
   $path = str_replace('/', '', request_uri());
   if(strpos($path, 'collection') === FALSE) {
@@ -40,8 +41,9 @@ Title=Digital%20Repository%20Request&CallNumber=';
     $sixth = '&Notes=';
     $obj = islandora_object_load($pid);
     $aeon_link =  $first . $second . $third . $pid  . $fourth. $fifth . $pid . $sixth . $obj->label;
-    dpm($aeon_link);
+    //dpm($aeon_link);
     return $aeon_link;
+    }
   }
 }
 
