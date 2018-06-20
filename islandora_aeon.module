@@ -22,11 +22,12 @@ function islandora_aeon_menu(){
 
 function check_path() {
   $list = variable_get('islandora_aeon_namespace_list');
+  dpm($list);
   $path = str_replace('/', '', request_uri());
   if(strpos($path, 'collection') === FALSE) {
     $list = explode(' ', $list);
     foreach($list as $namespace) {
-      $link = ((strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '');
+      //$link = (strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '';
     } 
     $pid = str_replace('/islandora/object/','', request_uri());
     $first = variable_get('islandora_aeon_url');
