@@ -30,14 +30,29 @@ function check_path() {
 //       $fourth = 'http://' . $_SERVER['SERVER_NAME'];
 //       $fifth = '/fedora/repository/';
 //       $sixth = '&Notes=';
+
+
+
       $second = '/RemoteAuth/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
       $third = '&DocumentType=Unknown'; //aka Material Type
       $fourth = '&ItemTitle='; //aka Title/Archival Collection Name
       $loc_url = urldecode('Louisiana & Lower Mississippi Valley Collections');
       $fifth = '&Location=' . $loc_url;
       $sixth = '&CallNumber=';
-      $obj = islandora_object_load($pid);
       $seventh = '&Notes=';
+
+      $obj = islandora_object_load($pid);
+      $dc = $obj['DC'];
+      $dc_string =$dc->content;
+      $dc_xml = simplexml_load_string($dc_string);
+      //this step not work...
+      $dc_title = $dc_xml->{'oai_dc:dc'}->{'dc:title'};
+      dpm($dc_title);
+      //$dc_title = somexpath magick
+      $mods = $obj['MODS'];
+      $mods_string = $mods->content;
+      $mods_xml = simplexml_load_string($mods_string);
+      dpm($mods_xml->xpath('/mods/location/holdingSimple/copyInformation/shelfLocator'));
       //$obj->models;
       //$obj->owner;
       $url = $_SERVER['SERVER_NAME'] . ':8000' . '/fedora/repository/' . $pid;
@@ -55,12 +70,9 @@ function islandora_aeon_link_form($form, &$form_state) {
       'class' => array('aeon-link'),
     ),
   );
+  $admin_text = variable_get('islandora_aeon_admin_text');
   $form['link'] = array(
-    '#markup' => "<div class='aeon-desciption'><p>You may order a high-resolution,
-digital copy of this image. Following the \"Place Order\" link below will take
-you to our Aeon request management system. If you have not used this system,
-you will be prompted to create a new account. You will need this account
-to process your order. " . l('Place Order', check_path(), $attributes) ."</p></div>",
+    '#markup' => "<div class='aeon-desciption'><p>" . $admin_text . ": " . l('Place Order', check_path(), $attributes) . "</p></div>",
   );
   return $form;
 }
