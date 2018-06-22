@@ -30,13 +30,10 @@ function check_path() {
 //       $fourth = 'http://' . $_SERVER['SERVER_NAME'];
 //       $fifth = '/fedora/repository/';
 //       $sixth = '&Notes=';
-
-
-
       $second = '/RemoteAuth/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
       $third = '&DocumentType=Unknown'; //aka Material Type
       $fourth = '&ItemTitle='; //aka Title/Archival Collection Name
-      $loc_url = urldecode('Louisiana & Lower Mississippi Valley Collections');
+      $loc_url = urlencode(htmlspecialchars('Louisiana & Lower Mississippi Valley Collections'));
       $fifth = '&Location=' . $loc_url;
       $sixth = '&CallNumber=';
       $seventh = '&Notes=';
@@ -45,23 +42,115 @@ function check_path() {
       $dc = $obj['DC'];
       $dc_string =$dc->content;
       $dc_xml = simplexml_load_string($dc_string);
-      //this step not work...
-      $dc_title = $dc_xml->{'oai_dc:dc'}->{'dc:title'};
+      //$dcns = $dc_xml->getNameSpaces(TRUE);
+      //$dc = $dc_xml->children($dcns['dc']);
+      //dpm($dc);
+      $dc_title = dc_title($dc_xml);
       dpm($dc_title);
-      //$dc_title = somexpath magick
+
       $mods = $obj['MODS'];
       $mods_string = $mods->content;
+      // dpm($mods_string);
       $mods_xml = simplexml_load_string($mods_string);
-      dpm($mods_xml->xpath('/mods/location/holdingSimple/copyInformation/shelfLocator'));
-      //$obj->models;
-      //$obj->owner;
+
+      $call_number =
+      $phys_arr = physical_arrangement($mods_xml);
+      dpm('call number: ' . $call_number);
+      dpm('physical arrangement: ' . $phys_arr);
+      $vol_issue = vol_issue($mods_xml);
+      dpm($vol_issue);
+      $file_name = file_name($mods_xml);
+      dpm($file_name);
+
+      //$vol_box_reel = '&ItemVolume=';
+      $call_number = '&CallNumber' . call_number($mods_xml);
+      $folder = '&ItemInfo2=' . $phys_arr;
+
       $url = $_SERVER['SERVER_NAME'] . ':8000' . '/fedora/repository/' . $pid;
-      $aeon_link =  $first . $second . $third . $fourth . $obj->label . $fifth . $sixth . $pid  . $seventh . $url;
+      $aeon_link =  $first . $second . $third . $fourth . $obj->label . $fifth . $folder . $call_number .  $sixth . $pid  . $seventh . $url;
       return $aeon_link;
     }
   }
 }
 
+function dc_title($dc) {
+  $title = $dc->xpath('//dc:title');
+  $dc_title = '';
+  if(count($title) > 1){
+    foreach($title as $t){
+        $dc_title = (string)$t;
+    }
+  }
+  else {
+    $dc_title = (string)$title[0];
+  }
+  return $dc_title;
+}
+
+function file_name($mods) {
+  $id = $mods->identifier;
+  $file_name = '';
+  foreach($id as $i) {
+    $dl = (string)$i['displayLabel'];
+     if($dl == 'Object File Name' || $dl == 'Item Number' )
+     $file_name = $dl . ': ' . (string)$i;
+  }
+  return $file_name;
+}
+
+function vol_issue($mods) {
+  $part = $mods->part;  //this matches all > xpath('//mods:part');
+  $vol_issue = '';
+  if(isset($p->detail)) {
+    foreach($part as $p) {
+      $label = (string)$p->detail['type'];
+      $number = (string)$p->detail->number;
+      $vol_issue = ucfirst($label) . ': ' . $number;
+    }
+  }
+  else {
+    $vol_issue = FALSE;
+  }
+  return $vol_issue;
+}
+
+function call_number($mods) {
+  $loc = $mods->location;
+  foreach($loc as $l) {
+    if(isset($l->shelfLocator)) {
+      $call_number = (string)$l->shelfLocator;
+    }
+    elseif(isset($l->holdingSimple)) {
+      $call_number = (string)$l->holdingSimple->copyInformation->shelfLocator;
+    }
+    else {
+      $call_number = FALSE;
+    }
+  }
+  return $call_number;
+}
+
+function physical_arrangement($mods) {
+  $related = $mods->xpath('//mods:relatedItem');
+    //foreach($mods->relatedItem as $related){}
+    //dpm((string)$mods->relatedItem->titleInfo['displayLabel']);
+  //dpm($related);
+  $ti = $related[0]->titleInfo;
+  //dpm($ti);
+  $phys_1 = (string)$ti->title; //(string)$ti->attributes()->displayLabel
+  $phys_2 = (string)$ti->partName;
+  $phys_3 = (string)$ti->partNumber;
+  if(!empty($phys_2)) {
+    $phys_arr = $phys_1 . ' ' . $phys_2;
+  }
+  elseif(!empty($phys_3)) {
+    $phys_arr = $phys_1 . ' ' . $phys_3;
+  }
+  else {
+    $phys_arr = FALSE;
+  }
+   return $phys_arr;
+}
 
 
 function islandora_aeon_link_form($form, &$form_state) {

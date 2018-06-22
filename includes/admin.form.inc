@@ -28,11 +28,21 @@ function islandora_aeon_admin_form($form, &$form_state) {
     '#default_value' => $text,
   );
   //Will need multiple aeon service links per institution in the future.
-  $form['link'] = array(
-    '#title' => 'Link to Aeon service',
-    '#type' => 'textfield',
-    '#default_value' => 'https://example.org', //example path to aeon site
-  );
+  $url = variable_get('islandora_aeon_url');
+  if(!isset($url)) {
+    $form['link'] = array(
+      '#title' => 'Link to Aeon service',
+      '#type' => 'textfield',
+      '#default_value' => 'https://example.org', //example path to aeon site
+    );
+  }
+  else {
+    $form['link'] = array(
+      '#title' => 'Link to Aeon service',
+      '#type' => 'textfield',
+      '#default_value' => $url,
+    );
+  }
   $form['submit'] = array(
    '#type' => 'submit',
    '#value' => t('Submit'),
