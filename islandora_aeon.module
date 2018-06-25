@@ -9,7 +9,7 @@ function islandora_aeon_menu(){
   $items['admin/islandora/tools/aeon'] = array(
     'title' => 'Aeon Request Configuration',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('islandora_aeon_admin_form', 1),
+    'page arguments' => array('islandora_aeon_admin_form'),
     'access arguments' => array('administer site configuration'),
     'file' => 'includes/admin.form.inc',
   );
