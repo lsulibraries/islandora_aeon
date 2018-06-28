@@ -61,10 +61,14 @@ function islandora_aeon_block_info() {
 function islandora_aeon_block_view() {
   module_load_include('inc','islandora_aeon','includes/block.form');
   $blocks = array();
+  $path = request_uri();
   $islandora_object_page = strpos(request_uri(), '/object');
-  $collpage = strpos(request_uri(), 'collection');
-  $rootpage = strpos(request_uri(), 'root');
-  if ( !$collpage  && !$rootpage && $islandora_object_page) {
+  $collpage = strpos($path, 'collection');
+  $rootpage = strpos($path, 'root');
+  $manage = strpos($path, 'manage');
+  $ds = strpos($path, 'datastream');
+  $regen = strpos($path, 'regenerate');
+  if ( !$collpage  && !$rootpage && $islandora_object_page && !$manage && !$ds && !$regen) {
         $blocks['subject'] = t('Order this image');
         $blocks['content'] = drupal_get_form('islandora_aeon_link_form');
       }
