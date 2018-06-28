@@ -23,7 +23,7 @@ function islandora_aeon_admin_form($form, &$form_state) {
   $admin_text = variable_get('islandora_aeon_admin_text');
   $text = (isset($admin_text)) ? $admin_text : $default_text;
   $form['context'] = array(
-    '#title' => 'Explain contetx of link',
+    '#title' => 'Explain context of link',
     '#type' => 'textarea',
     '#default_value' => $text,
   );
