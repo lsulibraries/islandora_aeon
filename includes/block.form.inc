@@ -17,7 +17,7 @@ function check_path() {
   $list = variable_get('islandora_aeon_namespace_list','test');
   if (isset($list)) {
     $path = str_replace('/', '', request_uri());
-    if(strpos($path, 'collection') === FALSE && strpos($path, 'manage') === FALSE) {
+    if(strpos($path, 'collection') === FALSE && strpos($path, 'manage') === FALSE && strpos($path, 'datastream') === FALSE && strpos($path, 'regenerate') === FALSE) {
 
       //path is verifed as good durpal locations
 
@@ -189,10 +189,10 @@ function physical_arrangement($mods) {
     }
   }
   //chop off last ': '
-  $phys_arr = substr($phys_str, 0, -2);
+  //$phys_arr = substr($phys_str, 0, -2);
   //if the box and info didn't already get put in their repsective $info['Folder'] and $info['Box']
   //put them there with this function via preg_match_all
-  $info = check_notes_for_box_folder($phys_arr, $info);
+  $info = check_notes_for_box_folder($phys_str, $info);
   return $info;
 }
 
@@ -203,7 +203,7 @@ function check_notes_for_box_folder($string, $info) {
   preg_match_all("/(\bFolder.\d+\b|\bBox.\d+\b)/i", $string, $found);
   $new_notes = preg_replace("/(\bFolder.\d+\b|\bBox.\d+\b)/i", "", $string);
   //take of last ':  '
-  $new_notes = substr($new_notes, 0, -3);
+  //$new_notes = substr($new_notes, 0, -3);
   foreach($found as $array) {
     foreach($array as $key => $value) {
       if(strpos($value, 'Box') !== FALSE ) {
@@ -226,7 +226,7 @@ function consolidate_multiple($array) {
     $ret[] = (string)$value;
     $ret['all'] .= (string)$value . ' ';
   }
-  return substr($ret['all'], 0, -1);
+  return $ret['all'];//substr($ret['all'], 0, -1);
 }
 
 // grab out the set parts of an gnarly array with empty values
