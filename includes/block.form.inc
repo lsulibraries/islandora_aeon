@@ -17,7 +17,7 @@ function check_path() {
   $list = variable_get('islandora_aeon_namespace_list','test');
   if (isset($list)) {
     $path = str_replace('/', '', request_uri());
-    if(strpos($path, 'collection') === FALSE && strpos($path, 'manage') === FALSE && strpos($path, 'datastream') === FALSE && strpos($path, 'regenerate') === FALSE) {
+    if(strpos($path, 'collection') === FALSE && strpos($path, 'manage') === FALSE && strpos($path, 'datastream') === FALSE && strpos($path, 'regenerate') === FALSE && strpos($path, 'destination') === FALSE) {
 
       //path is verifed as good durpal locations
 
