@@ -26,45 +26,62 @@ function check_path() {
       foreach($list as $namespace) {
         $link = (strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '';
       }
-      $pid = str_replace('/islandora/object/','', request_uri());
-      $aeon_link = aeon_link($pid);
-      return $aeon_link;
+      return true;
     }
   }
 }
 
-function aeon_link($pid){
+function aeon_link($link_type){
   $aeon_url = variable_get('islandora_aeon_url'); //change to add namespace to end of str associate each url with series of namespaces
-  $form_id = '/RemoteAuth/aeon.dll?Action=10&Form=20&Value=GenericRequestAll' . '&DocumentType=Unknown'; //aka Material Type
-  //$loc_url = urlencode('Louisiana & Lower Mississippi Valley Collections');
-  $loc_url = 'unknown'; //is it worth trying to add this?
-  $title = '&ItemTitle='; //aka Title/Archival Collection Name
-  $location = '&Location=' . $loc_url;
-  $notes = '&Notes=';
+  $auth = '';
+  $form = '';
+  switch ($link_type) {
+    case 'dup-lsu':
+      $auth = '/RemoteAuth';
+      $form = '/aeon.dll?Action=10&Form=23&Value=GenericRequestAll';
+    case 'dup-non':
+      $auth = '/AeonAuth';
+      $form = '/aeon.dll?Action=10&Form=23&Value=GenericRequestAll';
+    case 'req-lsu':
+      $auth = '/RemoteAuth';
+      $form = '/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
+    case 'req-non':
+      $auth = '/AeonAuth';
+      $form = '/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
+    }
 
+
+  $pid = str_replace('/islandora/object/','', request_uri());
+  $link_meta = link_builder($pid);
+  $aeon_link = $aeon_url . $auth . $form . $link_meta;
+  return $aeon_link;
+}
+
+function link_builder($pid) {
+  $string ='';
+  $string .= '&DocumentType=Unknown';
+  $string .= '&Location=' . 'unknown';
   $obj = islandora_object_load($pid);
   $dc_xml = simplexml_load_string($obj['DC']->content);
-
   $mods_xml = simplexml_load_string($obj['MODS']->content);
-  //dpm($mods_xml->children());
+  $title = '&ItemTitle='; //aka Title/Archival Collection Name
   $arrangement = physical_arrangement($mods_xml);
+  $url = $_SERVER['SERVER_NAME'] . ':8000' . '/fedora/repository/' . $pid;
+  $string .= '&ItemInfo2=' . $arrangement['Folder'];
+  $string .= '&Notes=' . urlencode($arrangement['notes'] . ' ' . $url);
+  $string  .= '&ItemVolume=' . $arrangement['Box'];
+  //dpm($mods_xml->children());
   // dpm('physical arrangement: ' . $arrangement['Folder']);
   // dpm('notes: ' . $arrangement['notes']);
   // dpm('box nuber: ' .$arrangement['Box']);
   // dpm('call number: ' . call_number($mods_xml));
   // dpm(file_name($mods_xml));
   // dpm(vol_issue($mods_xml));
-
-  $url = $_SERVER['SERVER_NAME'] . ':8000' . '/fedora/repository/' . $pid;
-  $title_and_collection = $title . dc_title($dc_xml) . '/' . parent_coll($obj);
-  $vol_issue = vol_issue($mods_xml);
-  $phys_arr = '&ItemInfo2=' . $arrangement['Folder'];
-  $notes .= urlencode($arrangement['notes'] . ' ' . $url);
-  $file_name = '&SpecialRequest='. file_name($mods_xml);
-  $vol_box_reel = '&ItemVolume=' . $arrangement['Box'];
-  $call_number = '&CallNumber=' . urlencode(call_number($mods_xml));
-  $aeon_link =  $aeon_url . $form_id . $title_and_collection . $location . $phys_arr . $vol_box_reel . $call_number . $file_name . $notes;
-  return $aeon_link;
+  $string .= $title . dc_title($dc_xml) . '/' . parent_coll($obj);
+  $string .= vol_issue($mods_xml);
+  $string .= '&SpecialRequest='. file_name($mods_xml);
+  $string .= '&CallNumber=' . urlencode(call_number($mods_xml));
+  return $string;
 }
 
 //ask for parent object and its label
@@ -246,14 +263,23 @@ function detangle_array($array) {
 
 
 function islandora_aeon_link_form($form, &$form_state) {
-  $attributes = array(
-    'attributes' => array(
-      'class' => array('aeon-link'),
-    ),
-  );
-  $admin_text = variable_get('islandora_aeon_admin_text');
-  $form['link'] = array(
-    '#markup' => "<div class='aeon-desciption'><p>" . $admin_text . ": " . l('Place Order', check_path(), $attributes) . "</p></div>",
-  );
-  return $form;
+  if (check_path()) {
+
+    $attributes = array(
+      'attributes' => array(
+        'class' => array('aeon-link'),
+      ),
+    );
+    $admin_text = variable_get('islandora_aeon_admin_text');
+    $links = array(
+      l('Schedule Visit (through myLSU)', aeon_link('req-lsu'), $attributes),
+      l('Schedule Visit (for non LSU patrons)', aeon_link('req-non'), $attributes),
+      l('Order Duplicate (through myLSU)', aeon_link('dup-lsu'), $attributes),
+      l('Order Duplicate (for non LSU patrons)', aeon_link('dup-non'), $attributes),
+    );
+    $form['link'] = array(
+      '#markup' => "<div class='aeon-desciption'><p>" . $admin_text . ": " . '<br>' . $links[0] . '<br>' . $links[1] . '<br>' . $links[2] . '<br>' . $links[3] . "</p></div>",
+    );
+    return $form;
+  }
 }
