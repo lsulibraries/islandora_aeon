@@ -25,12 +25,12 @@ function check_path() {
       }
     }
   }
-  $path_check = in_array('true',$path_test);
+  $path_check = in_array('true', $path_test);
   //check that the current item is amoung our namespace list members
   $list = explode(' ', $list);
   foreach($list as $namespace) {
-    if (strpos($path, $namespace) !== FALSE && $path_check){
-    return TRUE;
+    if (strpos($path, $namespace) !== FALSE && !$path_check){
+      return TRUE;
     }
   }
 }
