@@ -15,45 +15,36 @@
 
 function check_path() {
   $list = variable_get('islandora_aeon_namespace_list','test');
+  $path_test = [];
   if (isset($list)) {
     $path = str_replace('/', '', request_uri());
-    if(strpos($path, 'collection') === FALSE && strpos($path, 'manage') === FALSE && strpos($path, 'datastream') === FALSE && strpos($path, 'regenerate') === FALSE && strpos($path, 'destination') === FALSE) {
-
-      //path is verifed as good durpal locations
-
-      //check that the current item is amoung our namespace list members
-      $list = explode(' ', $list);
-      foreach($list as $namespace) {
-        $link = (strpos($path, $namespace) !== FALSE) ? $link = 'test' : $link = '';
+    $not_displayed = ['collection', 'manage', 'datastream', 'regenerate', 'root', 'destination'];
+    foreach($not_displayed as $check) {
+      if(preg_match('/'.$check.'/', $path) !== FALSE){
+        $path_test[$check] = 'true';
       }
-      return true;
+    }
+  }
+  $path_check = in_array('true',$path_test);
+  //check that the current item is amoung our namespace list members
+  $list = explode(' ', $list);
+  foreach($list as $namespace) {
+    if (strpos($path, $namespace) !== FALSE && $path_check){
+    return TRUE;
     }
   }
 }
 
 function aeon_link($link_type){
-  $aeon_url = variable_get('islandora_aeon_url'); //change to add namespace to end of str associate each url with series of namespaces
-  $auth = '';
-  $form = '';
-  switch ($link_type) {
-    case 'dup-lsu':
-      $auth = '/RemoteAuth';
-      $form = '/aeon.dll?Action=10&Form=23&Value=GenericRequestAll';
-    case 'dup-non':
-      $auth = '/AeonAuth';
-      $form = '/aeon.dll?Action=10&Form=23&Value=GenericRequestAll';
-    case 'req-lsu':
-      $auth = '/RemoteAuth';
-      $form = '/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
-    case 'req-non':
-      $auth = '/AeonAuth';
-      $form = '/aeon.dll?Action=10&Form=20&Value=GenericRequestAll';
-    }
-
-
+  $aeon_url = variable_get('islandora_aeon_url');
+  $test = explode('-', $link_type);
+  $auth = in_array('lsu', $test) ? 'Remote' : 'Aeon';
+  $form = in_array('req', $test) ? '20' : '23';
+  $formpart = '/aeon.dll?Action=10&Form=' . $form .'&Value=GenericRequestAll';
+  $authpart = '/' . $auth .'Auth';
   $pid = str_replace('/islandora/object/','', request_uri());
   $link_meta = link_builder($pid);
-  $aeon_link = $aeon_url . $auth . $form . $link_meta;
+  $aeon_link = $aeon_url . $authpart . $formpart . $link_meta;
   return $aeon_link;
 }
 
@@ -263,8 +254,6 @@ function detangle_array($array) {
 
 
 function islandora_aeon_link_form($form, &$form_state) {
-  if (check_path()) {
-
     $attributes = array(
       'attributes' => array(
         'class' => array('aeon-link'),
@@ -281,5 +270,4 @@ function islandora_aeon_link_form($form, &$form_state) {
       '#markup' => "<div class='aeon-desciption'><p>" . $admin_text . ": " . '<br>' . $links[0] . '<br>' . $links[1] . '<br>' . $links[2] . '<br>' . $links[3] . "</p></div>",
     );
     return $form;
-  }
 }
